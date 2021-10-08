@@ -1,0 +1,9 @@
+mercure:
+    hubs:
+        default:
+            url: '%env(MERCURE_PUBLISH_URL)%'
+            #public_url: '%env(MERCURE_PUBLIC_URL)%'
+            jwt:
+                secret: '%env(MERCURE_JWT_KEY)%'
+                provider: App\Service\JWTprovider
+                publish: '*'

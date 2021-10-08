@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h2>Liste des messages :</h2>
+<div class="messages-list">
+    {% if conversationId is defined %}
+        <a href="{{ path("conversation_browse") }}">Liste des Conversations</a> | <a href="{{ path("messages_add", {'id' : conversationId})  }}">Ajouter un message</a>
+    {% endif %}
+    {% for key, message in messages %}
+        <div class="message-content">
+            <p>{{ message.getUser.username }} - {{ message.content }}</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script type='application/javascript'></script>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h2>Liste des conversations :</h2>
+    <div class="messages-list">
+        <a href="{{ path("conversation_add") }}">Ajouter une conversation</a>
+        <ul>
+            {% for key, conversation in conversations %}
+                <li><a href="{{ path("messages_browse", {'id' : conversation.id}) }}">Conversation[{{ conversation.id }}]: {{ conversation.name }}.</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script type='application/javascript'></script>
+{% endblock %}

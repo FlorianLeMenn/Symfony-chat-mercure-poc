@@ -1,3 +1,4 @@
+{# templates/base.html.twig #}
 <!DOCTYPE html>
 <html>
     <head>
@@ -9,11 +10,37 @@
             {#{{ encore_entry_link_tags('app') }}#}
         {% endblock %}
 
-        {% block javascripts %}
-            {#{{ encore_entry_script_tags('app') }}#}
-        {% endblock %}
     </head>
     <body>
+    <h1>POC Mercure</h1>
         {% block body %}{% endblock %}
     </body>
+{% block javascripts %}
+    <script type='application/javascript'>
+        // Extract the hub URL from the Link header
+        const url   = new URL('{{ mercure_publish_url }}');
+        let pathUri = window.location.pathname.substring(1);
+
+        url.searchParams.append('topic', '/messages/{id}');
+
+        const eventSource = new EventSource(url, {
+            withCredentials: true //send cookies by browser
+        });
+
+        eventSource.onmessage = (event) => {
+            const data      = JSON.parse(event.data);
+            const slideDown = elem => elem.style.height = `${elem.scrollHeight}px`;
+            let me          = null;
+
+            console.log("ME = " + me + " SENDER ID = " +  data.idSender);
+            console.dir(data);
+            console.debug(location.pathname);
+
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+
+        });
+    </script>
+
+{% endblock %}
 </html>

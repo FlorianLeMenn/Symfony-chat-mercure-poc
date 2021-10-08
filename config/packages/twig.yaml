@@ -1,5 +1,8 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
+    form_themes: ['bootstrap_5_layout.html.twig']
+    globals:
+        mercure_publish_url: '%env(MERCURE_PUBLISH_URL)%'
 
 when@test:
     twig:

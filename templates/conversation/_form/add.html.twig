@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="conversation-add">
+    {{ form_start(form) }}
+    <div class="errors">
+        {{ form_errors(form) }}
+    </div>
+        {{ form_widget(form) }}
+    {{ form_end(form) }}
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+

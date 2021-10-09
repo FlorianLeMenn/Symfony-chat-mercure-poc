@@ -35,14 +35,20 @@ MERCURE_ALLOW_ANONYMOUS=1
 # a list of origins allowed to publish (only applicable when using cookie-based auth)
 MERCURE_PUBLISH_URL=http://localhost:3000/.well-known/mercure
 MERCURE_PUBLISH_ALLOWED_ORIGINS=*
+# If you use cookie or Authorization HTTP header
+# MERCURE_PUBLISH_ALLOWED_ORIGINS="http://localhost:3000 http://localhost:8000"
 # a space-separated list of allowed CORS origins, can be * for all
 MERCURE_CORS_ALLOWED_ORIGINS=*
+# If you use cookie or Authorization HTTP header
+# MERCURE_CORS_ALLOWED_ORIGINS="http://localhost:3000 http://localhost:8000"
 ###< symfony/mercure-bundle ###
 ```
 ### Créer un batch pour Windows
 Pour gérer les variables d'environment à l'execution de mercure.exe, nous pouvons créer un fichier ``launcher_mercure.bat``, à placer au même niveau que mercure.exe.
 
 Il contiendra les variables suivantes (à adapter en fonction de votre config) :
+
+=> Pour une utilisation <u>sans cookie ou  ``Authorization HTTP header``</u>
 ```
 set JWT_KEY=YourJwtKey
 set ADDR=localhost:3000
@@ -53,8 +59,16 @@ set CORS_ALLOWED_ORIGINS=*
 ```
 Documentation config Mercure => [Configuration server spec](https://mercure.rocks/docs/hub/config)
 
-Si vous utilisez un cookie ou un ``Authorization HTTP header`` => [Authorization spec](https://mercure.rocks/spec#authorization)
+=> Si vous utilisez un cookie ou un ``Authorization HTTP header`` => [Authorization spec](https://mercure.rocks/spec#authorization)
 
+```
+set JWT_KEY=YourJwtKey
+set ADDR=localhost:3000
+set ALLOW_ANONYMOUS=1
+set PUBLISH_ALLOWED_ORIGINS="http://localhost:3000 http://localhost:8000"
+set CORS_ALLOWED_ORIGINS="http://localhost:3000 http://localhost:8000"
+.\mercure.exe
+```
 
 
 ## Twig

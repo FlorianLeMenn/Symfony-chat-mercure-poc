@@ -25,7 +25,7 @@
 
         //Définir les topic a écouter : utilisation du template messages/{id} pour écouter plusieur sujet
         url.searchParams.append('topic', '/messages/{id}');
-        //url.searchParams.append('topic', '/ping/{id}');
+        url.searchParams.append('topic', '/ping/{id}');
 
         // listen to the HUB.
         //MODE authorization, cookie or header

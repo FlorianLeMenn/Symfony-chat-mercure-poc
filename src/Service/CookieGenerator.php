@@ -28,7 +28,7 @@ class CookieGenerator
 
     public function generate(): Cookie
     {
-        $domain = ($_ENV["APP_ENV"] == "dev")? $_SERVER['HTTP_HOST'] : '.flameup.com';
+        $domain = ($_ENV["APP_ENV"] == "dev")? $_SERVER['HTTP_HOST'] : '.monsite.com';
         $secure = ($_ENV["APP_ENV"] == "dev")? false : true;
         $httpOnly = false;
 
@@ -59,7 +59,7 @@ class CookieGenerator
 //            ->getToken($config->signer(), $config->signingKey());
 //
 //        //compagre JWT generation
-        dd($this->jwt);
+        //dd($this->jwt);
 
         return Cookie::create(
             'mercureAuthorization',

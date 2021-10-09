@@ -1,5 +1,11 @@
 
 # Mise en place du POC Mercure Chat
+
+Le POC Mercure Chat consiste à mettre en place un chat avec différents groupes de conversation entre utilisateurs.
+L'intéret de Mercure est de gérer les messages reçu en temps réel via SSE : [Server-sent event](https://en.wikipedia.org/wiki/Server-sent_events).
+
+Informations  => [Mercure](https://mercure.rocks/)
+
 ## Composer & BDD
 1. Installer les bundles & dépendances :`composer install --dev & composer update -W`
 2. Créer la BDD (DATABASE_URL doit être renseigné préalablement dans le fichier .env.local) : ``php bin/console doctrine:database:create``
@@ -33,7 +39,7 @@ MERCURE_PUBLISH_ALLOWED_ORIGINS=*
 MERCURE_CORS_ALLOWED_ORIGINS=*
 ###< symfony/mercure-bundle ###
 ```
-### Créer un batch por Windows
+### Créer un batch pour Windows
 Pour gérer les variables d'environment à l'execution de mercure.exe, nous pouvons créer un fichier ``launcher_mercure.bat``, à placer au même niveau que mercure.exe.
 
 Il contiendra les variables suivantes (à adapter en fonction de votre config) :

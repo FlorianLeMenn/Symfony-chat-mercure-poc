@@ -48,6 +48,7 @@ class JWTprovider implements TokenProviderInterface
         foreach ($conversations as $conversation) {
             $subscribe[] =  '/messages/' . $conversation->getId();
         }
+        $subscribe[] = '/ping/{id}';
 
         $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($this->secret));
         $token  = $config->builder()

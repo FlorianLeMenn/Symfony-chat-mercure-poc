@@ -77,7 +77,7 @@ class MessageController extends AbstractController
                         GroupConversation $groupConversation): Response
     {
         $message = new Message();
-        //$user = $this->userRepository->find(1);
+        $user = $this->userRepository->find(1);
 
         $form = $this->createForm(MessageType::class, $message);
         $form->handleRequest($request);
@@ -91,30 +91,29 @@ class MessageController extends AbstractController
             $message->setSeen(false);
             $message->setUser($this->userRepository->findOneBy(['id' => 2]));
             $groupConversation->addMessage($message);
-            //$groupConversation->addUser($user);
+            $groupConversation->addUser($user);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($messageFormValues);
             $em->flush();
 
-            $this->addFlash('success', 'Nouvelle conversation ajoutée.');
-            return $this->redirectToRoute('messages_browse', ['groupConversation' => $groupConversation->getId()] );
-        }
+            $this->addFlash('success', "Nouveau message ajouté !");
 
-        $this->addFlash('success', "Nouveau message ajouté !");
-
-        $update = new Update(
-            '/messages/1', //IRI, the topic being updated, can be any string usually URL
-            json_encode(['message' => 'Nouveau message']), //the content of the update, can be anything
+            $update = new Update(
+                '/messages/1', //IRI, the topic being updated, can be any string usually URL
+                json_encode(['message' => 'Nouveau message']), //the content of the update, can be anything
 //            true, //private
 //            '/messages/1',//
 //            'message'
-        );
+            );
 
-        //PUBLISHER JWT : doit contenir la liste des conversations dans lesquels il peut publier conf => mercure.publish
-        //SUBSCRIBER JWT: doit contenir la liste des conversations dans lesquels il peut recevoir conf => mercure.subcribe
-        //dd($update);
-        $hub->publish($update);
+            //PUBLISHER JWT : doit contenir la liste des conversations dans lesquels il peut publier conf => mercure.publish
+            //SUBSCRIBER JWT: doit contenir la liste des conversations dans lesquels il peut recevoir conf => mercure.subcribe
+            //dd($update);
+            $hub->publish($update);
+            return $this->redirectToRoute('messages_browse', ['groupConversation' => $groupConversation->getId()] );
+        }
+
 
         return $this->renderForm('message/_form/add.html.twig', [
             'form' => $form,

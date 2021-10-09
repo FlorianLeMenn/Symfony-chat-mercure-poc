@@ -66,7 +66,7 @@ class CookieGenerator
             $this->jwt,
             0,
             '/.well-known/mercure',
-            $domain,
+            null,//$domain,
             $secure,
             $httpOnly,
             false,

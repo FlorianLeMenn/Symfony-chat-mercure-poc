@@ -2,16 +2,9 @@
 # Mise en place du POC Mercure Chat
 ## Composer & BDD
 1. Installer les bundles & dépendances :`composer install --dev & composer update -W`
-2. Créer la BDD
+2. Créer la BDD (DATABASE_URL doit être renseigné préalablement dans le fichier .env.local) : ``php bin/console doctrine:database:create``
 3. Exécuter les migrations :``php bin/console d:mi:mi``
-4. Créer des utilisateurs dans la table ``User``
-```
-INSERT INTO user (username, mail, password, roles) 
-VALUES 
-('florian', 'floria2n@test.fr', 'test', 'USER_ROLE'), 
-('henri', 'henri@test.fr', 'test', 'USER_ROLE'), 
-('Laura', 'laura@test.fr', 'test', 'USER_ROLE');
-```
+4. Éxécuter les fixtures : ``php bin/console doctrine:fixtures:load``
 
 ## Mercure
 

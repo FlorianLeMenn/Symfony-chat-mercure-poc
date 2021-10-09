@@ -5,10 +5,10 @@ namespace App\Controller;
 use App\Entity\GroupConversation;
 use App\Entity\Message;
 use App\Entity\User;
+use App\Form\MessageType;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
 use App\Service\CookieGenerator;
-use Cassandra\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,8 +32,7 @@ class MessageController extends AbstractController
      */
     private $userRepository;
 
-    public function __construct(MessageRepository $messageRepository,
-                                UserRepository $userRepository)
+    public function __construct(MessageRepository $messageRepository, UserRepository $userRepository)
     {
         $this->messageRepository = $messageRepository;
         $this->userRepository = $userRepository;
@@ -43,19 +42,18 @@ class MessageController extends AbstractController
     /**
      * Display list of messages from conversation
      *
-     * @Route("/{id}", name="browse")
+     * @Route("/{groupConversation}", name="browse")
      * @param GroupConversation $groupConversation
      */
-    public function browse($id,CookieGenerator $cookieGenerator): Response {
+    public function browse(GroupConversation $groupConversation, ?CookieGenerator $cookieGenerator): Response {
 
-        $messages = $this->messageRepository->findMessageByConversationId($id);
+        $messages = $this->messageRepository->findMessageByConversationId($groupConversation->getId());
 
         $response = $this->render('message/browse.html.twig', [
-            'conversationId' => $id,
+            'conversation' => $groupConversation,
             'messages' => $messages,
         ]);
 
-        $response->headers->setCookie($cookieGenerator->generate());
         return $response;
     }
 
@@ -76,32 +74,31 @@ class MessageController extends AbstractController
      */
     public function add(Request $request,
                         HubInterface $hub,
-                        CookieGenerator $cookieGenerator,
                         GroupConversation $groupConversation): Response
     {
         $message = new Message();
-        $em      = $this->getDoctrine()->getManager();
+        //$user = $this->userRepository->find(1);
 
-        /** @var User $user */
-        $user    = $this->getUser();
+        $form = $this->createForm(MessageType::class, $message);
+        $form->handleRequest($request);
 
-        $message->setContent("Nouveau message! - " . rand(0,10000));
-        $message->setSeen(false);
-        $message->setCreated(new \DateTime());
-        $message->setUpdated(new \DateTime());
-        $message->setUser($this->userRepository->findOneBy(['id' => 2]));
+        if ($form->isSubmitted() && $form->isValid()) {
 
-        $groupConversation->addMessage($message);
+            $messageFormValues = $form->getData();
 
-        $em->getConnection()->beginTransaction();
-        try {
-            $em->persist($message);
+            $message->setCreated(new \DateTime('now'));
+            $message->setUpdated(new \DateTime('now'));
+            $message->setSeen(false);
+            $message->setUser($this->userRepository->findOneBy(['id' => 2]));
+            $groupConversation->addMessage($message);
+            //$groupConversation->addUser($user);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($messageFormValues);
             $em->flush();
-            $em->flush();
-            $em->commit();
-        } catch (\Exception $e) {
-            $em->rollback();
-            throw $e;
+
+            $this->addFlash('success', 'Nouvelle conversation ajoutée.');
+            return $this->redirectToRoute('messages_browse', ['groupConversation' => $groupConversation->getId()] );
         }
 
         $this->addFlash('success', "Nouveau message ajouté !");
@@ -109,20 +106,41 @@ class MessageController extends AbstractController
         $update = new Update(
             '/messages/1', //IRI, the topic being updated, can be any string usually URL
             json_encode(['message' => 'Nouveau message']), //the content of the update, can be anything
-            true, //private
-            //'1234',//
-            //'message'
+//            true, //private
+//            '/messages/1',//
+//            'message'
         );
 
         //PUBLISHER JWT : doit contenir la liste des conversations dans lesquels il peut publier conf => mercure.publish
         //SUBSCRIBER JWT: doit contenir la liste des conversations dans lesquels il peut recevoir conf => mercure.subcribe
         //dd($update);
-
         $hub->publish($update);
 
-        $response = $this->redirectToRoute("messages_browse", ["id" => 1]);
-        $response->headers->setCookie($cookieGenerator->generate());
-        return $response;
+        return $this->renderForm('message/_form/add.html.twig', [
+            'form' => $form,
+        ]);
+    }
+
+    /**
+     * Ping mercure
+     * @Route("/{id}/ping", name="ping")
+     */
+    public function ping(Request $request,HubInterface $hub)
+    {
+        $update = new Update(
+            '/ping/1', //IRI, the topic being updated, can be any string usually URL
+            json_encode(['message' => 'Nouveau ping']), //the content of the update, can be anything
+//            true, //private
+//            '/messages/1',//
+//            'message'
+        );
+
+        //PUBLISHER JWT : doit contenir la liste des conversations dans lesquels il peut publier conf => mercure.publish
+        //SUBSCRIBER JWT: doit contenir la liste des conversations dans lesquels il peut recevoir conf => mercure.subcribe
+        //dd($update);
+        $hub->publish($update);
+
+        return $this->redirectToRoute('messages_browse', ['groupConversation' => $request->get('id')]);
     }
 
 //    /**

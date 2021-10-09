@@ -2,13 +2,22 @@
 
 {% block body %}
     <h2>Liste des conversations :</h2>
-    <div class="messages-list">
-        <a href="{{ path("conversation_add") }}">Ajouter une conversation</a>
-        <ul>
-            {% for key, conversation in conversations %}
-                <li><a href="{{ path("messages_browse", {'id' : conversation.id}) }}">Conversation[{{ conversation.id }}]: {{ conversation.name }}.</a></li>
-            {% endfor %}
-        </ul>
+    <div class="messages-list col-4">
+        <div class="container my-3">
+            <a  class="btn btn-primary" href="{{ path("conversation_add") }}">Ajouter une conversation</a>
+        </div>
+
+        <div class="container">
+            <ul class="list-group">
+                {% for key, conversation in conversations %}
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <a href="{{ path("messages_browse", {'groupConversation' : conversation.id}) }}">Conversation [{{ conversation.id }}]: {{ conversation.name }}.</a>
+                        <span class="badge bg-primary rounded-pill">14</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
     </div>
 {% endblock %}
 {% block javascripts %}

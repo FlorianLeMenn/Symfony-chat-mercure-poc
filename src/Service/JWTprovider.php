@@ -3,7 +3,8 @@
 namespace App\Service;
 
 use App\Entity\User;
-use DateTimeImmutable;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
@@ -21,20 +22,38 @@ class JWTprovider implements TokenProviderInterface
 
     private $tokenStorage;
 
-    public function __construct(string $secret, TokenStorageInterface $tokenStorage)
+    private $em;
+
+    public function __construct(string $secret,
+                                TokenStorageInterface $tokenStorage,
+                                EntityManagerInterface $em)
     {
         $this->secret       = $secret;
         $this->tokenStorage = $tokenStorage;
+        $this->em           = $em;
     }
-
 
     public function getJwt(): string
     {
+        //get all conversation by user
+        /**
+         * @var User $user
+         */
+        $subscribe = [];
+        //user test
+        $user = $this->em->getRepository(User::class)->find(1);
+        $conversations = $user->getConversations()->getValues();
+
+        //save all sub/pub conversations
+        foreach ($conversations as $conversation) {
+            $subscribe[] =  '/messages/' . $conversation->getId();
+        }
+
         $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($this->secret));
         $token  = $config->builder()
             ->withClaim('mercure', [
-                'subscribe' => ['*'],
-                'publish' => ['*']
+                'subscribe' => $subscribe,
+                'publish' => $subscribe
             ])
             // Builds a new token
             ->getToken($config->signer(), $config->signingKey());

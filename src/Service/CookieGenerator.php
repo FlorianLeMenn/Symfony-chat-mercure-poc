@@ -59,7 +59,7 @@ class CookieGenerator
 //            ->getToken($config->signer(), $config->signingKey());
 //
 //        //compagre JWT generation
-//        dd($token->toString(),$this->jwt);
+        dd($this->jwt);
 
         return Cookie::create(
             'mercureAuthorization',

@@ -27,8 +27,9 @@ class UserFixtures extends Fixture
             $user->setUsername('Florian' . random_int(0,1000));
             $user->setMail(random_bytes(7).'@test1.fr');
             $user->setPassword($password);
-            $user->setRoles(null);
+            $user->setRoles([]);
         }
+        $manager->persist($user);
 
         $manager->flush();
     }

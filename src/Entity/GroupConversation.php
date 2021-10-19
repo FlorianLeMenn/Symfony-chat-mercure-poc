@@ -44,6 +44,11 @@ class GroupConversation
      */
     private $users;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="groupConversations")
+     */
+    private $admin;
+
     public function __construct()
     {
         $this->messages = new ArrayCollection();
@@ -144,6 +149,18 @@ class GroupConversation
         if ($this->users->removeElement($user)) {
             $user->removeConversation($this);
         }
+
+        return $this;
+    }
+
+    public function getAdmin(): ?User
+    {
+        return $this->admin;
+    }
+
+    public function setAdmin(?User $admin): self
+    {
+        $this->admin = $admin;
 
         return $this;
     }

@@ -51,11 +51,17 @@ class User implements UserInterface
      */
     private $conversations;
 
+    /**
+     * @ORM\OneToMany(targetEntity=GroupConversation::class, mappedBy="admin")
+     */
+    private $groupConversations;
+
 
     public function __construct()
     {
         $this->messages = new ArrayCollection();
         $this->conversations = new ArrayCollection();
+        $this->groupConversations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -161,6 +167,36 @@ class User implements UserInterface
     public function removeConversation(GroupConversation $conversation): self
     {
         $this->conversations->removeElement($conversation);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|GroupConversation[]
+     */
+    public function getGroupConversations(): Collection
+    {
+        return $this->groupConversations;
+    }
+
+    public function addGroupConversation(GroupConversation $groupConversation): self
+    {
+        if (!$this->groupConversations->contains($groupConversation)) {
+            $this->groupConversations[] = $groupConversation;
+            $groupConversation->setAdmin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroupConversation(GroupConversation $groupConversation): self
+    {
+        if ($this->groupConversations->removeElement($groupConversation)) {
+            // set the owning side to null (unless already changed)
+            if ($groupConversation->getAdmin() === $this) {
+                $groupConversation->setAdmin(null);
+            }
+        }
 
         return $this;
     }

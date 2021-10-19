@@ -5,15 +5,29 @@ namespace  App\Controller;
 use App\Entity\GroupConversation;
 use App\Form\GroupConversationType;
 use App\Repository\GroupConversationRepository;
+use App\Repository\MessageRepository;
+use App\Repository\UserRepository;
 use App\Service\CookieGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\User;
 
 
 class GroupConversationController extends AbstractController
 {
+
+    /**
+     * @var UserRepository
+     */
+    private $userRepository;
+
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     //BREAD controller action pattern
     /**
      * Display list of conversations
@@ -53,6 +67,14 @@ class GroupConversationController extends AbstractController
      */
     public function add(Request $request): Response
     {
+        /** @var User $user */
+        //used with connected user
+//        $user = $this->security->getUser()->getId();
+//        if(!($user)) {
+//            $this->addFlash('error', 'Utilisateur créateur du groupe incorrect.');
+//            return $this->redirectToRoute('conversation/_form/add.html.twig');
+//        }
+        $user = $this->userRepository->find(1);
         $conversation = new GroupConversation();
 
         $form = $this->createForm(GroupConversationType::class, $conversation);
@@ -63,6 +85,7 @@ class GroupConversationController extends AbstractController
 
             $conversation->setCreated(new \DateTime('now'));
             $conversation->setUpdated(new \DateTime('now'));
+            $conversation->setAdmin($user);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($conversationFormValues);

@@ -28,7 +28,7 @@ class CookieGenerator
 
     public function generate(): Cookie
     {
-        $domain = ($_ENV["APP_ENV"] == "dev")? $_SERVER['HTTP_HOST'] : '.monsite.com';
+        $domain = ($_ENV["APP_ENV"] == "dev")? 'localhost' : '.monsite.com';
         $secure = ($_ENV["APP_ENV"] == "dev")? false : true;
         $httpOnly = false;
 
@@ -66,10 +66,11 @@ class CookieGenerator
             $this->jwt,
             0,
             '/.well-known/mercure',
-            null,//$domain,
+            $domain,
             $secure,
             $httpOnly,
             false,
-            'lax');
+            'lax'
+        );
     }
 }

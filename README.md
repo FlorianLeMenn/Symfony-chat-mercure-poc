@@ -43,34 +43,58 @@ MERCURE_CORS_ALLOWED_ORIGINS=*
 # MERCURE_CORS_ALLOWED_ORIGINS="http://localhost:3000 http://localhost:8000"
 ###< symfony/mercure-bundle ###
 ```
-### Créer un batch pour Windows
-Pour gérer les variables d'environment à l'execution de mercure.exe, nous pouvons créer un fichier ``launcher_mercure.bat``, à placer au même niveau que mercure.exe.
+### Commande Windows  PowerShell
 
-Il contiendra les variables suivantes (à adapter en fonction de votre config) :
+Pour lancer Mercure sur Windows :
 
-=> Pour une utilisation <u>sans cookie ou  ``Authorization HTTP header``</u>
-```
-set JWT_KEY=YourJwtKey
-set ADDR=localhost:3000
-set ALLOW_ANONYMOUS=1
-set PUBLISH_ALLOWED_ORIGINS=*
-set CORS_ALLOWED_ORIGINS=*
-.\mercure.exe
-```
-Documentation config Mercure => [Configuration server spec](https://mercure.rocks/docs/hub/config)
-
-=> Si vous utilisez un cookie ou un ``Authorization HTTP header`` => [Authorization spec](https://mercure.rocks/spec#authorization)
+`$env:ADDR=":3000";$env:SERVER_NAME=":3000";$env:JWT_KEY="YourJwtKey";$env:MERCURE_EXTRA_DIRECTIVES="cors_origins http://localhost:8000"; ./mercure run -config Caddyfile.dev`
+### Fichier de conf CaddyFile
 
 ```
-set JWT_KEY=YourJwtKey
-set ADDR=localhost:3000
-set ALLOW_ANONYMOUS=1
-set PUBLISH_ALLOWED_ORIGINS="http://localhost:3000 http://localhost:8000"
-set CORS_ALLOWED_ORIGINS="http://localhost:3000 http://localhost:8000"
-.\mercure.exe
+# Learn how to configure the Mercure.rocks Hub on https://mercure.rocks/docs/hub/config
+{
+    # Debug mode (disable it in production!)
+    {$DEBUG:debug}
+    # HTTP/3 support
+    servers {
+        protocol {
+            experimental_http3
+        }
+    }
+}
+
+{$SERVER_NAME:localhost}
+
+log
+
+route {
+    redir / /.well-known/mercure/ui/
+    encode zstd gzip
+
+    mercure {
+        # Transport to use (default to Bolt)
+        transport_url {$MERCURE_TRANSPORT_URL:bolt://mercure.db}
+        # Publisher JWT key
+        jwt_key {env.JWT_KEY}
+        #public_url {env.MERCURE_PUBLIC_URL}
+        # Publisher JWT key
+        publisher_jwt {env.MERCURE_PUBLISHER_JWT_KEY} {env.MERCURE_PUBLISHER_JWT_ALG}
+        # Subscriber JWT key
+        subscriber_jwt {env.MERCURE_SUBSCRIBER_JWT_KEY} {env.MERCURE_SUBSCRIBER_JWT_ALG}
+        #cors_origins {env.MERCURE_CORS_ALLOWED_ORIGINS}
+        #publish_origins {env.MERCURE_PUBLISH_ALLOWED_ORIGINS}
+        #demo
+        #anonymous
+        #subscriptions
+        # Extra directives
+        {$MERCURE_EXTRA_DIRECTIVES}
+    }
+
+    respond /healthz 200
+
+    respond "Not Found" 404
+}
 ```
-
-
 ## Twig
 ### Création d'une variable globale Twig MERCURE_PUBLISH_URL
 

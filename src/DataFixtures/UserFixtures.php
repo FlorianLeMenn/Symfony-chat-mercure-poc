@@ -25,12 +25,12 @@ class UserFixtures extends Fixture
             $user = new User();
             $password = $this->passwordHasher->hashPassword($user, random_bytes(10));
             $user->setUsername('Florian' . random_int(0,1000));
-            $user->setMail(random_bytes(7).'@test1.fr');
+            $user->setMail('test' . random_int(0,1000).'@test1.fr');
             $user->setPassword($password);
             $user->setRoles([]);
+            $manager->persist($user);
+            $manager->flush();
         }
-        $manager->persist($user);
 
-        $manager->flush();
     }
 }

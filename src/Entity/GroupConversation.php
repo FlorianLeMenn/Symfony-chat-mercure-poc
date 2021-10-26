@@ -25,7 +25,7 @@ class GroupConversation
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity=Message::class, mappedBy="conversation")
+     * @ORM\OneToMany(targetEntity=Message::class, mappedBy="conversation", cascade={"persist"})
      */
     private $messages;
 
@@ -40,19 +40,25 @@ class GroupConversation
     private $updated;
 
     /**
-     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="conversations")
+     * @ORM\ManyToMany(targetEntity=User::class, mappedBy="conversations", cascade={"persist"})
      */
     private $users;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="groupConversations")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="adminGroupConversations", cascade={"persist"})
      */
     private $admin;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $private;
 
     public function __construct()
     {
         $this->messages = new ArrayCollection();
-        $this->users = new ArrayCollection();
+        $this->users    = new ArrayCollection();
+        $this->private  = 1;
     }
 
     public function getId(): ?int
@@ -161,6 +167,18 @@ class GroupConversation
     public function setAdmin(?User $admin): self
     {
         $this->admin = $admin;
+
+        return $this;
+    }
+
+    public function getPrivate(): ?bool
+    {
+        return $this->private;
+    }
+
+    public function setPrivate(bool $private): self
+    {
+        $this->private = $private;
 
         return $this;
     }

@@ -35,10 +35,15 @@
 
         eventSource.onmessage = (event) => {
 
-            console.dir(event);
+            const data = JSON.parse(event.data)
+            console.dir(data);
             console.debug(location.pathname);
 
-            document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Ping !</div> `);
+            if(event.type === 'message')
+                document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Nouveau message de ${data.from}</div> `);
+            else
+                document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Ping !</div> `);
+
             window.setTimeout( () => {
                 const alert = document.querySelector('.alert');
                 alert.parentNode.removeChild(alert);

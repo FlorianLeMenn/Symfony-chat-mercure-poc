@@ -35,26 +35,29 @@ class GroupConversationType extends AbstractType
         //dd($users);
 
         $builder
-            ->add('name', TextType::class)
-            ->add('users', EntityType::class, array(
-                'class'     => User::class,
-                'choice_value' => 'id',
-                'choice_label' => 'username',
-                'expanded'  => true,
-                'multiple'  => true,
-            ))
-//            ->add('users', ChoiceType::class, [
-//                    'label'     => false,
-//                    'required' => true,
-//                    'choices'  => $users,
-//                    'choice_value' => 'id',
-//                    'choice_label' => function(?User $user) {
-//                        return $user ? strtoupper($user->getUsername()) : '';
-//                    },
-//                    'expanded' => true,
-//                    'multiple' => true,
-//                ]
-//            )
+            ->add('name', TextType::class, [
+                'label' => 'Nom du groupe',
+            ])
+            ->add('users', EntityType::class, [
+                    'class'         => User::class,
+                    'label'         => 'Membres du group',
+                    'choice_value'  => 'id',
+                    'choice_label'  => 'username',
+                    'expanded'      => true,
+                    'multiple'      => true,
+                ]
+            )
+            ->add('private', ChoiceType::class, [
+                    'choices' => array(
+                        'Oui' => '1',
+                        'Non' => '0'
+                    ),
+                    'label'     => 'Groupe privé',
+                    'expanded'  => true,
+                    'required'  => true,
+                    'multiple'  => false,
+                ]
+            )
             ->add('Enregistrer', SubmitType::class)
         ;
     }

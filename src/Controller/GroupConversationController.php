@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\User;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
 class GroupConversationController extends AbstractController
@@ -38,14 +39,15 @@ class GroupConversationController extends AbstractController
      */
     public function browse(GroupConversationRepository $groupConversationRepository, ?CookieGenerator $cookieGenerator): Response {
         $conversations = $groupConversationRepository->findAll();
-
         $response = $this->render('conversation/browse.html.twig', [
             'conversations' => $conversations,
+            'jwt'           => $cookieGenerator->generate()->getValue(),
         ]);
 
-        $response->headers->set("Access-Control-Allow-Origin", '*');
+        //fix CORS policy
+        //$response->headers->set("Access-Control-Allow-Origin", '*');
+        //generate cookie for connected user
         $response->headers->setCookie($cookieGenerator->generate());
-        //dd( $response->headers);
 
         return $response;
     }
@@ -65,7 +67,7 @@ class GroupConversationController extends AbstractController
      *
      * @Route("/conversation/add", name="conversation_add")
      */
-    public function add(Request $request): Response
+    public function add(Request $request, ValidatorInterface $validator): Response
     {
         /** @var User $user */
         //used with connected user
@@ -74,24 +76,35 @@ class GroupConversationController extends AbstractController
 //            $this->addFlash('error', 'Utilisateur créateur du groupe incorrect.');
 //            return $this->redirectToRoute('conversation/_form/add.html.twig');
 //        }
-        $user = $this->userRepository->find(1);
+        $user_admin = $this->userRepository->find(1);
         $conversation = new GroupConversation();
 
         $form = $this->createForm(GroupConversationType::class, $conversation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $conversationFormValues = $form->getData();
 
             $conversation->setCreated(new \DateTime('now'));
             $conversation->setUpdated(new \DateTime('now'));
-            $conversation->setAdmin($user);
+            $conversation->setAdmin($user_admin);
+
+            //@TODO: I dont understand why users are not saved with ManyToMany connexion (table user_group_conversation)
+            $user_admin->addConversation($conversation);
+            if($conversation->getUsers()) {
+                foreach ($conversation->getUsers() as $user) {
+                    $user->addConversation($conversation);
+                }
+            }
+
+            $errors = $validator->validate($conversation);
+            if (count($errors) > 0) {
+                return new Response((string) $errors, 400);
+            }
 
             $em = $this->getDoctrine()->getManager();
-            $em->persist($conversationFormValues);
+            $em->persist($conversation);
             $em->flush();
 
-            $this->addFlash('success', 'Nouvelle conversation ajoutée.');
             return $this->redirectToRoute('conversation_browse');
         }
 

@@ -19,6 +19,16 @@ class GroupConversationRepository extends ServiceEntityRepository
         parent::__construct($registry, GroupConversation::class);
     }
 
+    public function getTotalMessages(int $conversationId) {
+
+        $qb = $this->createQueryBuilder('c');
+        $qb->select('count(m)')
+            ->leftJoin('c.messages', 'm')
+            ->where('c.id = :conversationId')
+            ->setParameter('conversationId', $conversationId);
+
+        return $qb->getQuery()->getSingleScalarResult();
+    }
     // /**
     //  * @return GroupConversation[] Returns an array of GroupConversation objects
     //  */

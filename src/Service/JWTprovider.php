@@ -40,7 +40,7 @@ class JWTprovider implements TokenProviderInterface
          * @var User $user
          */
         $subscribe = [];
-        //user test
+        //user test, replace by connected user
         $user = $this->em->getRepository(User::class)->find(1);
         $conversations = $user->getConversations()->getValues();
 

@@ -30,7 +30,7 @@ class Message
     private $seen;
 
     /**
-     * @ORM\ManyToOne(targetEntity=GroupConversation::class, inversedBy="messages")
+     * @ORM\ManyToOne(targetEntity=GroupConversation::class, inversedBy="messages", cascade={"persist"})
      */
     private $conversation;
 
@@ -45,7 +45,7 @@ class Message
     private $updated;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="messages")
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="messages",cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $user;

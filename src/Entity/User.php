@@ -42,26 +42,26 @@ class User implements UserInterface
     private $roles = [];
 
     /**
-     * @ORM\OneToMany(targetEntity=Message::class, mappedBy="user", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Message::class, mappedBy="user", orphanRemoval=true, cascade={"persist"})
      */
     private $messages;
 
     /**
-     * @ORM\ManyToMany(targetEntity=GroupConversation::class, inversedBy="users")
+     * @ORM\ManyToMany(targetEntity=GroupConversation::class, inversedBy="users", cascade={"persist"})
      */
     private $conversations;
 
     /**
-     * @ORM\OneToMany(targetEntity=GroupConversation::class, mappedBy="admin")
+     * @ORM\OneToMany(targetEntity=GroupConversation::class, mappedBy="admin", cascade={"persist"})
      */
-    private $groupConversations;
+    private $adminGroupConversations;
 
 
     public function __construct()
     {
-        $this->messages = new ArrayCollection();
-        $this->conversations = new ArrayCollection();
-        $this->groupConversations = new ArrayCollection();
+        $this->messages                 = new ArrayCollection();
+        $this->conversations            = new ArrayCollection();
+        $this->adminGroupConversations  = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -174,15 +174,15 @@ class User implements UserInterface
     /**
      * @return Collection|GroupConversation[]
      */
-    public function getGroupConversations(): Collection
+    public function getAdminGroupConversations(): Collection
     {
-        return $this->groupConversations;
+        return $this->adminGroupConversations;
     }
 
     public function addGroupConversation(GroupConversation $groupConversation): self
     {
-        if (!$this->groupConversations->contains($groupConversation)) {
-            $this->groupConversations[] = $groupConversation;
+        if (!$this->adminGroupConversations->contains($groupConversation)) {
+            $this->adminGroupConversations[] = $groupConversation;
             $groupConversation->setAdmin($this);
         }
 
@@ -191,7 +191,7 @@ class User implements UserInterface
 
     public function removeGroupConversation(GroupConversation $groupConversation): self
     {
-        if ($this->groupConversations->removeElement($groupConversation)) {
+        if ($this->adminGroupConversations->removeElement($groupConversation)) {
             // set the owning side to null (unless already changed)
             if ($groupConversation->getAdmin() === $this) {
                 $groupConversation->setAdmin(null);

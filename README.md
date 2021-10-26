@@ -1,6 +1,7 @@
 
 # Mise en place du POC Mercure Chat
-
+![img.png](img.png)
+![img_1.png](img_1.png)
 Le POC Mercure Chat consiste à mettre en place un chat avec différents groupes de conversation entre utilisateurs.
 L'intéret de Mercure est de gérer les messages reçu en temps réel via SSE : [Server-sent event](https://en.wikipedia.org/wiki/Server-sent_events).
 

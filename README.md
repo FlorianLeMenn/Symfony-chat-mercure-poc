@@ -1,6 +1,6 @@
 
 # Mise en place du POC Mercure Chat
-###Liste des groupes
+### Liste des groupes
 ![img.png](img.png)
 ### Formulaire de création de groupe
 ![img_1.png](img_1.png)
@@ -11,13 +11,13 @@ L'intéret de Mercure est de gérer les messages reçu en temps réel via SSE : 
 
 Informations  => [Mercure](https://mercure.rocks/)
 
-##Installation :  Composer & BDD
+## Installation :  Composer & BDD
 1. Installer les bundles & dépendances :`composer install --dev & composer update -W`
 2. Créer la BDD (DATABASE_URL doit être renseigné préalablement dans le fichier .env.local) : ``php bin/console doctrine:database:create``
 3. Exécuter les migrations :``php bin/console d:mi:mi``
 4. Éxécuter les fixtures : ``php bin/console doctrine:fixtures:load``
 
-##Installation : Mercure
+## Installation : Mercure
 
 1. Télécharger Mercure pour votre environment => [ici](https://github.com/dunglas/mercure/releases)
 2. Créer un fichier ``.env.local``

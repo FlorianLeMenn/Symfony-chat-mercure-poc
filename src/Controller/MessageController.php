@@ -65,16 +65,6 @@ class MessageController extends AbstractController
         return $response;
     }
 
-//    /**
-//     * Display one message
-//     *
-//     * @Route("/message/{id}", name="message_read", requirements={"id" : "\d+"})
-//     */
-//    public function read(MessageRepository $messageRepository): Response
-//    {
-//
-//    }
-
     /**
      * Create new message
      *
@@ -85,15 +75,17 @@ class MessageController extends AbstractController
                         GroupConversation $groupConversation): Response
     {
         $message = new Message();
-        $user = $this->userRepository->find(5);
 
         $form = $this->createForm(MessageType::class, $message);
         $form->handleRequest($request);
+        $content = $request->get('message-box', null);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($content) {
 
             $message->setCreated(new \DateTime('now'));
             $message->setUpdated(new \DateTime('now'));
+            $message->setContent($content);
+            $message->setMine(true);
             $message->setSeen(false);
 
             //By default is set to group admin, custom this with connected user
@@ -101,17 +93,18 @@ class MessageController extends AbstractController
             $groupConversation->addMessage($message);
 
             try {
-
+                $date   = new \DateTime('now');
                 $update = new Update(
                     '/messages/' . $groupConversation->getId(), //IRI, the topic being updated, can be any string usually URL
                     json_encode([
-                        'message' => 'Nouveau message conversation :' . $groupConversation->getId(),
-                        'from' => $groupConversation->getAdmin()->getId(),
-                        'to'   => $groupConversation->getUsers(),
-                        'date' => new \DateTime('now'),
+                        'conversation'  => 'Nouveau message conversation :' . $groupConversation->getName(),
+                        'message'       => $content,
+                        'from'          => $groupConversation->getAdmin()->getUsername(),
+                        'to'            => $groupConversation->getUsers(),
+                        'date'          => $date->format('H:i'),
                     ]), //the content of the update, can be anything
                     $groupConversation->getPrivate(), //private
-                    'message-' . Uuid::v4(),//
+                    'message-' . Uuid::v4(),//mercure id
                 'message'
                 );
 
@@ -125,27 +118,22 @@ class MessageController extends AbstractController
                 dd($groupConversation);
                 throw $e;
             }
-
-            return $this->redirectToRoute('messages_browse', ['groupConversation' => $groupConversation->getId()] );
         }
 
-
-        return $this->renderForm('message/_form/add.html.twig', [
-            'form' => $form,
-        ]);
+        return $this->redirectToRoute('messages_browse', ['groupConversation' => $groupConversation->getId()] );
     }
 
     /**
      * Ping mercure
      * @Route("/{id}/ping", name="ping")
      */
-    public function ping(Request $request,HubInterface $hub)
+    public function ping(Request $request, HubInterface $hub)
     {
         $update = new Update(
             '/ping/1', //IRI, the topic being updated, can be any string usually URL
-            json_encode(['message' => 'Nouveau ping']), //the content of the update, can be anything
+            json_encode(['message' => 'pinged !']), //the content of the update, can be anything
             false, //private
-            'ping-'. Uuid::v4(),//
+            'ping-' . Uuid::v4(),//
             'ping'
         );
 
@@ -157,13 +145,4 @@ class MessageController extends AbstractController
         return $this->redirectToRoute('messages_browse', ['groupConversation' => $request->get('id')]);
     }
 
-//    /**
-//     * Delete message
-//     *
-//     * @Route("/{id}/delete", name="delete", requirements={"id" : "\d+"}, methods={"DELETE"})
-//     */
-//    public function delete(): Response
-//    {
-//
-//    }
 }

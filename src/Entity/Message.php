@@ -50,6 +50,8 @@ class Message
      */
     private $user;
 
+    private $mine;
+
     public function __construct()
     {
         $this->user = new ArrayCollection();
@@ -66,6 +68,21 @@ class Message
         return $this->content;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getMine()
+    {
+        return $this->mine;
+    }
+
+    /**
+     * @param mixed $mine
+     */
+    public function setMine($mine): void
+    {
+        $this->mine = $mine;
+    }
     public function setContent(string $content): self
     {
         $this->content = $content;

@@ -21,7 +21,6 @@
     <script type='application/javascript'>
         // Extract the hub URL from the Link header
         const url   = new URL('{{ mercure_publish_url }}');
-        let pathUri = window.location.pathname.substring(1);
 
         //Définir les topic a écouter : utilisation du template messages/{id} pour écouter plusieur sujet
         url.searchParams.append('topic', '/messages/{id}');
@@ -34,15 +33,14 @@
         //const eventSource = new EventSource(url);
 
         eventSource.onmessage = (event) => {
+            console.dir(event);
 
-            const data = JSON.parse(event.data)
-            console.dir(data);
-            console.debug(location.pathname);
-
-            if(event.type === 'message')
+            if(event.type === 'message') {
+                const data = JSON.parse(event.data);
                 document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Nouveau message de ${data.from}</div> `);
-            else
-                document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Ping !</div> `);
+            }
+            else if(event.type === 'ping')
+            document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Ping !</div> `);
 
             window.setTimeout( () => {
                 const alert = document.querySelector('.alert');

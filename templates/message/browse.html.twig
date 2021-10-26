@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="messages-list col-4">
+<div class="messages-list col-12">
     <div class="container my-3">
         {% if conversation is defined %}
             <a  class="btn btn-primary" href="{{ path("conversation_browse") }}">Liste des Conversations</a>
@@ -10,18 +10,166 @@
         {% endif %}
     </div>
 
-    <div class="container">
-        {% if conversation is defined %}
-            <a class="btn btn-primary" href="{{ path("messages_add", {'id' : conversation.id}) }}">Ajouter un message</a>
-        {% endif %}
-        {% for key, message in messages %}
-            <div class="message-content">
-                <p>{{ message.getUser.username }} - {{ message.content }}</p>
+    <div class="container ">
+        <div class="conversation">
+            {% if messages is empty %}
+                <div class="row">
+                    <div class="media mr-auto mb-3">
+                        <div class="col-12 media-body">
+                            Envoyez le premier message.
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                {% for key, message in messages %}
+                    {% if message.getMine %}
+                        <!-- Sender Message-->
+                        <div class="chat--message ">
+                            <div class="d-flex flex-row-reverse">
+                                <div class="content bg-info p-1">
+                                    <p class="text-white mb-0">{{ message.getUser.username }} : {{ message.getContent }}</p>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-row-reverse mb-2">
+                                <div class="message--info--right">
+                                    <div class="message--date">{{ message.created | date("H:i") }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Reciever Message-->
+                        <div class="chat--message">
+                            <div class="d-flex flex-row">
+                                <div class="content bg-secondary p-1">
+                                    <p class="text-white mb-0">{{ message.getUser.username }} : {{ message.getContent }}</p>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-row mb-2">
+                                <div class="message--info--left">
+                                    <div class="message--date">{{ message.created | date("H:i") }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div id="bottom"></div>
+        <div class="controls d-flex justify-content-between">
+            {% if conversation is defined %}
+            <div class="control--input">
+                <textarea id="message-box" name="message-box" aria-describedby="button-send" class="input--controls" placeholder="Saisir un message"></textarea>
             </div>
-        {% endfor %}
+            <input id="button-send" type="submit" class="btn-send btn btn-primary" value="Envoyer"/>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
 {% block javascripts %}
-    {{ parent() }}
+    <script type="application/javascript">
+
+        /**
+         * autoscroll bottom
+         */
+        function autoBottomScroll() {
+            const objDiv = document.querySelector(".conversation");
+            objDiv.scrollIntoView({block: "end", inline: "nearest"});
+        }
+
+        /**
+         * Gestion envoit de messages temps réel avec Mercure
+         */
+        document.getElementById( 'bottom' ).scrollIntoView();
+        document.addEventListener('DOMContentLoaded', function () {
+
+            let messageBox    = document.querySelector('#message-box');
+            let pathUri       = window.location.pathname;
+
+            messageBox.addEventListener('keyup', (event) => {
+                if(event.keyCode === 13) {
+                    sendMessage(event.target.value);
+                    messageBox.value= "";
+                }
+            })
+
+            document.getElementById("button-send").addEventListener("click", (event) => {
+                sendMessage(messageBox.value);
+                messageBox.value= "";
+            })
+
+            //console.log('URI = ' + pathUri);
+            fetch(pathUri).then(result => {
+
+                // Extract the hub URL from the Link header
+                const hubUrl   = new URL('{{ mercure_publish_url }}');
+                //console.log("hubUrl = " + hubUrl);
+                const url      = new URL(hubUrl);
+
+                // Append the topic(s) to subscribe as query parameter
+                url.searchParams.append('topic', pathUri);
+                //console.log('fetch = ' + pathUri);
+
+                // Subscribe to updates
+                const eventSource = new EventSource(url, {
+                    withCredentials: true //send cookies by browser
+                });
+
+                //console.debug(eventSource);
+
+                if (typeof(eventSource !== undefined)) {
+                    eventSource.onmessage = (event) => {
+                        //console.dir(event);
+
+                        if (event.data !== null) {
+                            const data = JSON.parse(event.data);
+                            const newMessageHTML =
+                                '<div class="chat--message">'+
+                                '    <div class="d-flex flex-row">'+
+                                '        <div class="content bg-secondary p-1"><p class="text-white mb-0">'+ data.message +'</p></div>'+
+                                '    </div>'+
+                                '    <div class="message--info--left">'+
+                                '        <div class="message--date">'+ data.date +'</div>'+
+                                '    </div>'+
+                                '</div>';
+
+                            document.querySelector('.conversation').insertAdjacentHTML('beforeend', '<div class="row">' + newMessageHTML + '</div>');
+                            autoBottomScroll();
+                        }
+                    }
+                }
+            });
+
+        });
+
+        function sendMessage(data) {
+
+            if(data === "")
+                return;
+
+            let formData = new FormData();
+            //set URI path to add a message ex: /messages/1/add
+            const pathUri = window.location.pathname + '/add'
+            //get textarea value to save
+            formData.append('message-box', data);
+            console.log('ADD MESSAGE URI : ' + pathUri);
+
+            fetch( pathUri, {
+                method: 'POST',
+                body: formData
+            }).then(result => {
+                // update chat-message
+                let newMessageHTML =
+                    '<div class="chat--message">'+
+                    '<div class="d-flex flex-row-reverse">'+
+                    '   <div class="content bg-info p-1 mb-3">'+
+                    '       <p class="text-white mb-0">'+data+'</p>'+
+                    '   </div>'+
+                    '</div>'+
+                    '</div>';
+                document.querySelector('.conversation').insertAdjacentHTML('beforeend', '<div class="row">' + newMessageHTML + '</div>');
+                autoBottomScroll();
+            });
+        }
+    </script>
 {% endblock %}

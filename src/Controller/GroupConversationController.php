@@ -5,7 +5,6 @@ namespace  App\Controller;
 use App\Entity\GroupConversation;
 use App\Form\GroupConversationType;
 use App\Repository\GroupConversationRepository;
-use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
 use App\Service\CookieGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -39,15 +38,16 @@ class GroupConversationController extends AbstractController
      */
     public function browse(GroupConversationRepository $groupConversationRepository, ?CookieGenerator $cookieGenerator): Response {
         $conversations = $groupConversationRepository->findAll();
+        $cookie        =  $cookieGenerator->generate();
         $response = $this->render('conversation/browse.html.twig', [
             'conversations' => $conversations,
-            'jwt'           => $cookieGenerator->generate()->getValue(),
+            'jwt'           => $cookie->getValue(),
         ]);
 
         //fix CORS policy
         //$response->headers->set("Access-Control-Allow-Origin", '*');
         //generate cookie for connected user
-        $response->headers->setCookie($cookieGenerator->generate());
+        $response->headers->setCookie($cookie);
 
         return $response;
     }

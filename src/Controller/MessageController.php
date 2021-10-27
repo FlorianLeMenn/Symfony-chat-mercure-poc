@@ -130,19 +130,15 @@ class MessageController extends AbstractController
     public function ping(Request $request, HubInterface $hub)
     {
         $update = new Update(
-            '/ping/1', //IRI, the topic being updated, can be any string usually URL
+            '/ping/' .  $request->get('id'), //IRI, the topic being updated, can be any string usually URL
             json_encode(['message' => 'pinged !']), //the content of the update, can be anything
             false, //private
-            'ping-' . Uuid::v4(),//
+            'ping-' . Uuid::v4(), //mercure id
             'ping'
         );
 
-        //PUBLISHER JWT : doit contenir la liste des conversations dans lesquels il peut publier conf => mercure.publish
-        //SUBSCRIBER JWT: doit contenir la liste des conversations dans lesquels il peut recevoir conf => mercure.subcribe
-        //dd($update);
         $hub->publish($update);
 
         return $this->redirectToRoute('messages_browse', ['groupConversation' => $request->get('id')]);
     }
-
 }

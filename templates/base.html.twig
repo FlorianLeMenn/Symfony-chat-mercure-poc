@@ -31,6 +31,10 @@
         const eventSource = new EventSource(url, {withCredentials: true});
         //MODE anonymous
         //const eventSource = new EventSource(url);
+        eventSource.addEventListener('ping', (event) => {
+            if(event.type === 'ping')
+                document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Ping !</div> `);
+        },false);
 
         eventSource.onmessage = (event) => {
             console.dir(event);
@@ -39,8 +43,6 @@
                 const data = JSON.parse(event.data);
                 document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Nouveau message de ${data.from}</div> `);
             }
-            if(event.type === 'ping')
-                document.querySelector('h1').insertAdjacentHTML('afterend', `<div class="alert alert-success">Ping !</div> `);
 
             window.setTimeout( () => {
                 const alert = document.querySelector('.alert');

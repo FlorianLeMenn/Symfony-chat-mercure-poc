@@ -55,6 +55,8 @@ class MessageController extends AbstractController
      */
     public function browse(GroupConversation $groupConversation, ?CookieGenerator $cookieGenerator): Response {
 
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
         $messages = $this->messageRepository->findMessageByConversationId($groupConversation->getId());
 
         $response = $this->render('message/browse.html.twig', [
@@ -74,6 +76,7 @@ class MessageController extends AbstractController
                         HubInterface $hub,
                         GroupConversation $groupConversation): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
         $message = new Message();
 
         $form = $this->createForm(MessageType::class, $message);
@@ -129,6 +132,8 @@ class MessageController extends AbstractController
      */
     public function ping(Request $request, HubInterface $hub)
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
         $update = new Update(
             '/ping/' .  $request->get('id'), //IRI, the topic being updated, can be any string usually URL
             json_encode(['message' => 'pinged !']), //the content of the update, can be anything

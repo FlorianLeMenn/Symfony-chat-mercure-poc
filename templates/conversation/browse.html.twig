@@ -7,7 +7,13 @@
             <a  class="btn btn-primary" href="{{ path("conversation_add") }}">Créer une conversation</a>
             <a  class="btn btn-success" href="https://jwt.io/?token={{ jwt }}" target="_blank">Check JWT sur jwt.io </a>
         </div>
+
         <div class="container">
+            {% if app.user %}
+                <div class="connected-user">
+                    <p>Connecté en tant que : {{ app.user.getUsername }} <a  class="btn btn-danger" href="{{ path("app_logout") }}">Déconnexion</a></p>
+                </div>
+            {% endif %}
             <ul class="list-group">
                 {% for key, conversation in conversations %}
                     <li class="list-group-item d-flex justify-content-between align-items-start">

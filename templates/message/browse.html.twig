@@ -11,6 +11,11 @@
     </div>
 
     <div class="container ">
+        {% if app.user %}
+            <div class="connected-user">
+                <p>Connecté en tant que : {{ app.user.getUsername }} <a  class="btn btn-danger" href="{{ path("app_logout") }}">Déconnexion</a></p>
+            </div>
+        {% endif %}
         <div class="conversation">
             {% if messages is empty %}
                 <div class="row">

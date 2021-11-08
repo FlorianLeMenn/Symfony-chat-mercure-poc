@@ -37,6 +37,8 @@ class GroupConversationController extends AbstractController
      * @return Response
      */
     public function browse(GroupConversationRepository $groupConversationRepository, ?CookieGenerator $cookieGenerator): Response {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
         $conversations = $groupConversationRepository->findAll();
         $cookie        =  $cookieGenerator->generate();
         $response = $this->render('conversation/browse.html.twig', [
@@ -69,6 +71,8 @@ class GroupConversationController extends AbstractController
      */
     public function add(Request $request, ValidatorInterface $validator): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
         /** @var User $user */
         //used with connected user
 //        $user = $this->security->getUser()->getId();

@@ -1,0 +1,77 @@
+{# templates/registration/index.html.twig #} {% extends 'base.html.twig' %}
+
+{% block body %}
+{#    <script type="text/javascript">#}
+{#        var onloadCallback = function() {#}
+{#            grecaptcha.render('captcha', {#}
+{#                'sitekey' : '{{ google_recaptcha_site_key }}',#}
+{#            });#}
+{#        };#}
+{#    </script>#}
+    <div class="registration">
+        <header>
+        </header>
+        <div class="registration-wrapper">
+            {{ form_start(form, {'attr': {'id': 'user_registration', 'class' : 'form--container'}}) }}
+            <span class="form--title">
+                <h2>Inscription</h2>
+            </span>
+
+            <div class="form--input--container">
+                {{ form_row(form.username, {'attr': {'class': 'form-control','placeholder': 'Nom d\'utilisateur'}}) }}
+            </div>
+
+            {% if form_errors(form.mail) %}
+                <div class="form-error">
+                    <i class="fas fa-exclamation-triangle"></i> {{ form_errors(form.mail)|striptags }}
+                </div>
+            {% endif %}
+            <div class="form--input--container">
+                {{ form_row(form.mail, {'attr': {'class': 'form-control', 'placeholder': 'E-mail'}}) }}
+            </div>
+
+            {% if form_errors(form.password.first) %}
+                <div class="form-error">
+                    <i class="fas fa-exclamation-triangle"></i> {{ form_errors(form.password.first)|striptags }}
+                </div>
+            {% endif %}
+            <div class="form--input--container">
+                {{ form_row(form.password.first, {'attr': {'class':'form-control', 'placeholder': 'Mot de passe'}}) }}
+            </div>
+
+            {% if form_errors(form.password.second) %}
+                <div class="form-error">
+                    <i class="fas fa-exclamation-triangle"></i> {{ form_errors(form.password.second)|striptags }}
+                </div>
+            {% endif %}
+            <div class="form--input--container">
+                {{ form_row(form.password.second, {'attr': {'class':'form-control', 'placeholder': 'Confirmer le mot de passe'}}) }}
+            </div>
+
+            <div id="captcha"></div>
+            <input type="submit" value="Créer le compte" class="form--submit">
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+{#    <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>#}
+    <script>
+        const togglePassword = document.querySelector('.picto-eye');
+        const password_1 = document.getElementById('user_password_first');
+        const password_2 = document.getElementById('user_password_second');
+
+        togglePassword.addEventListener('click', function (e) {
+            // toggle the type attribute
+            const type = password_1.getAttribute('type') === 'password' ? 'text' : 'password';
+            const type2 = password_2.getAttribute('type') === 'password' ? 'text' : 'password';
+            password_1.setAttribute('type', type);
+            password_2.setAttribute('type', type);
+            // toggle the eye / eye slash icon
+            this.classList.toggle('bi-eye');
+        });
+
+    </script>
+{% endblock %}

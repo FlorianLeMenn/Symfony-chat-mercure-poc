@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Uid\Uuid;
 
 
@@ -39,21 +40,32 @@ class MessageController extends AbstractController
      */
     private $em;
 
-    public function __construct(MessageRepository $messageRepository, UserRepository $userRepository, EntityManagerInterface $em)
+    /**
+     * @var Security
+     */
+    private Security $security;
+
+    public function __construct(MessageRepository $messageRepository,
+                                UserRepository $userRepository,
+                                EntityManagerInterface $em,
+                                Security $security)
     {
         $this->messageRepository    = $messageRepository;
         $this->userRepository       = $userRepository;
         $this->em                   = $em;
+        $this->security             = $security;
     }
 
     //BREAD controller action pattern
+
     /**
      * Display list of messages from conversation
      *
      * @Route("/{groupConversation}", name="browse")
      * @param GroupConversation $groupConversation
+     * @return Response
      */
-    public function browse(GroupConversation $groupConversation, ?CookieGenerator $cookieGenerator): Response {
+    public function browse(GroupConversation $groupConversation): Response {
 
         $this->denyAccessUnlessGranted('ROLE_USER');
 
@@ -77,6 +89,13 @@ class MessageController extends AbstractController
                         GroupConversation $groupConversation): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
+        //used with connected user
+        $user = $this->security->getUser();
+        if(!($user)) {
+            $this->addFlash('error', 'Utilisateur incorrect.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $message = new Message();
 
         $form = $this->createForm(MessageType::class, $message);
@@ -91,8 +110,7 @@ class MessageController extends AbstractController
             $message->setMine(true);
             $message->setSeen(false);
 
-            //By default is set to group admin, custom this with connected user
-            $message->setUser($groupConversation->getAdmin());
+            $message->setUser($user);
             $groupConversation->addMessage($message);
 
             try {
@@ -102,7 +120,7 @@ class MessageController extends AbstractController
                     json_encode([
                         'conversation'  => 'Nouveau message conversation :' . $groupConversation->getName(),
                         'message'       => $content,
-                        'from'          => $groupConversation->getAdmin()->getUsername(),
+                        'from'          => $user->getUsername(),
                         'to'            => $groupConversation->getUsers(),
                         'date'          => $date->format('H:i'),
                     ]), //the content of the update, can be anything
@@ -118,7 +136,7 @@ class MessageController extends AbstractController
                 $this->em->flush();
             }
             catch (\Exception $e) {
-                dd($groupConversation);
+                //dd($groupConversation);
                 throw $e;
             }
         }

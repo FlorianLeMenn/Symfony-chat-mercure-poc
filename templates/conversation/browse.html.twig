@@ -1,6 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+    {% if app.user %}
+        <div class="connected-user">
+            <p>Connecté en tant que : {{ app.user.getUsername }} <a  class="btn btn-danger" href="{{ path("app_logout") }}">Déconnexion</a></p>
+        </div>
+    {% endif %}
     <h2>Liste des groupes de conversations :</h2>
     <div class="messages-list col-12">
         <div class="container my-3">
@@ -9,11 +14,6 @@
         </div>
 
         <div class="container">
-            {% if app.user %}
-                <div class="connected-user">
-                    <p>Connecté en tant que : {{ app.user.getUsername }} <a  class="btn btn-danger" href="{{ path("app_logout") }}">Déconnexion</a></p>
-                </div>
-            {% endif %}
             <ul class="list-group">
                 {% for key, conversation in conversations %}
                     <li class="list-group-item d-flex justify-content-between align-items-start">

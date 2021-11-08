@@ -1,19 +1,27 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
+    {% if app.user %}
+        <div class="connected-user">
+            <p>Connecté en tant que : {{ app.user.getUsername }} <a  class="btn btn-danger" href="{{ path("app_logout") }}">Déconnexion</a></p>
+        </div>
+    {% endif %}
 <div class="messages-list col-12">
     <div class="container my-3">
         {% if conversation is defined %}
             <a  class="btn btn-primary" href="{{ path("conversation_browse") }}">Liste des Conversations</a>
             <a class="btn btn-success" href="{{ path("messages_ping", {'id' : conversation.id}) }}">Ping Mercure (EventSource)</a>
             <h2>Conversation : {{ conversation.name }}</h2>
+            {% if conversation.admin.getId == app.user.getId %}
+                <a class="btn btn-danger" href="{{ path("conversation_delete", {'id' : conversation.id}) }}">supprimer</a>
+            {% endif %}
         {% endif %}
     </div>
 
     <div class="container ">
-        {% if app.user %}
+        {% if(conversation.admin.getUsername) %}
             <div class="connected-user">
-                <p>Connecté en tant que : {{ app.user.getUsername }} <a  class="btn btn-danger" href="{{ path("app_logout") }}">Déconnexion</a></p>
+                <p>Administrateur : {{ conversation.admin.getUsername }}</p>
             </div>
         {% endif %}
         <div class="conversation">

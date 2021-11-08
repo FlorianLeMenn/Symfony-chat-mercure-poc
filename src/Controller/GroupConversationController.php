@@ -3,6 +3,7 @@
 namespace  App\Controller;
 
 use App\Entity\GroupConversation;
+use App\Entity\User;
 use App\Form\GroupConversationType;
 use App\Repository\GroupConversationRepository;
 use App\Repository\UserRepository;
@@ -11,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\User;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 
@@ -21,11 +22,17 @@ class GroupConversationController extends AbstractController
     /**
      * @var UserRepository
      */
-    private $userRepository;
+    private UserRepository $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    /**
+     * @var Security
+     */
+    private Security $security;
+
+    public function __construct(UserRepository $userRepository,Security $security)
     {
         $this->userRepository = $userRepository;
+        $this->security       = $security;
     }
 
     //BREAD controller action pattern
@@ -54,16 +61,6 @@ class GroupConversationController extends AbstractController
         return $response;
     }
 
-//    /**
-//     * Display one conversation group
-//     *
-//     * @Route("/conversation/{id}", name="conversation_read", requirements={"id" : "\d+"})
-//     */
-//    public function read(GroupConversationRepository $groupConversationRepository): Response
-//    {
-//
-//    }
-
     /**
      * Create new Conversation group
      *
@@ -73,14 +70,14 @@ class GroupConversationController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        /** @var User $user */
         //used with connected user
-//        $user = $this->security->getUser()->getId();
-//        if(!($user)) {
-//            $this->addFlash('error', 'Utilisateur créateur du groupe incorrect.');
-//            return $this->redirectToRoute('conversation/_form/add.html.twig');
-//        }
-        $user_admin = $this->userRepository->find(1);
+        /** @var User $user */
+        $user = $this->security->getUser();
+        if(!($user)) {
+            $this->addFlash('error', 'Utilisateur créateur du groupe incorrect.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $conversation = new GroupConversation();
 
         $form = $this->createForm(GroupConversationType::class, $conversation);
@@ -90,10 +87,10 @@ class GroupConversationController extends AbstractController
 
             $conversation->setCreated(new \DateTime('now'));
             $conversation->setUpdated(new \DateTime('now'));
-            $conversation->setAdmin($user_admin);
+            $conversation->setAdmin($user);
 
             //@TODO: I dont understand why users are not saved with ManyToMany connexion (table user_group_conversation)
-            $user_admin->addConversation($conversation);
+            $user->addConversation($conversation);
             if($conversation->getUsers()) {
                 foreach ($conversation->getUsers() as $user) {
                     $user->addConversation($conversation);
@@ -117,13 +114,14 @@ class GroupConversationController extends AbstractController
         ]);
     }
 
-//    /**
-//     * Delete conversation group
-//     *
-//     * @Route("/conversation/{id}/delete", name="conversation_delete", requirements={"id" : "\d+"})
-//     */
-//    public function delete(): Response
-//    {
-//
-//    }
+    /**
+     * Delete conversation group
+     *
+     * @Route("/conversation/{id}/delete", name="conversation_delete", requirements={"id" : "\d+"})
+     */
+    public function delete(GroupConversation $groupConversation): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+    }
 }
